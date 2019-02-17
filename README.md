@@ -1,2 +1,2 @@
 # myXploits
-Here you can find some security bug exploits I did
+Here you can find some automated exploits I did
